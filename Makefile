@@ -1,4 +1,4 @@
-SRCS := test.cpp
+SRCS := pointcloud.cpp
 HDRS :=
 TRGT := PCAP
 COMP := g++

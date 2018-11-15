@@ -8,18 +8,18 @@
 #include <arpa/inet.h>
 #include <vector>
 
-struct Channel {
+struct __attribute__((packed)) Channel {
   uint16_t distance;
   uint8_t reflectivity;
 };
 
-struct DataBlock {
+struct __attribute__((packed)) DataBlock {
   uint16_t flag;
   uint16_t azimuth;
   Channel channels[32];
 };
 
-struct DataPacket {
+struct __attribute__((packed)) DataPacket {
   uint8_t header[42];
   DataBlock blocks[12];
   uint32_t timestamp;
@@ -48,6 +48,7 @@ void read_into_data(const u_char *packet, struct pcap_pkthdr packet_header) {
     }
 
     DataPacket temp;
+
     int offset = 0;
     int width_of_datablock = 100;
     int width_of_channels = 3;
@@ -63,6 +64,8 @@ void read_into_data(const u_char *packet, struct pcap_pkthdr packet_header) {
 
       temp.blocks[i].azimuth = uint16_t((packet[offset + 2]) << 8 |
                                         (packet[offset + 3]));
+
+      cout << temp.blocks[i].azimuth << endl;
       /* Read the Channels in. */
       for (int j = 0; j < 32; j++) {
         offset = packet[42 + (i*width_of_datablock) +4+ (j*width_of_channels)];
@@ -84,7 +87,7 @@ void read_into_data(const u_char *packet, struct pcap_pkthdr packet_header) {
 
 
     data.push_back(temp);
-    cout << data.size() << endl;
+    //cout << data.size() << endl;
   }
 
 
