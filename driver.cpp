@@ -54,7 +54,7 @@ void read_into_data(const u_char *packet, struct pcap_pkthdr packet_header) {
     temp.factory = uint16_t((packet[1246]) << 8 |
                             (packet[1247]));
 
-
+    /* Construct the points from this parsed data. */
     points.constructPointsFromPacket(temp);
 
   }
