@@ -1,4 +1,4 @@
-SRCS := pointcloud.cpp
+SRCS := pointcloud.cpp driver.cpp
 HDRS :=
 TRGT := PCAP
 COMP := g++
