@@ -1,7 +1,7 @@
 #include "pointcloud.h"
 
 PointCloud points;
-int cutoff = 150;
+int cutoff = 500;
 int to = 0;
 
 void print_packet_info(const u_char *packet, struct pcap_pkthdr packet_header) {
@@ -13,63 +13,76 @@ void print_packet_info(const u_char *packet, struct pcap_pkthdr packet_header) {
 bytes get read in correctly. Therefore, this section is some straight up no
 frills annoying as shit byte allocation. */
 void read_into_data(const u_char *packet, struct pcap_pkthdr packet_header) {
-    /* No clue what to do with the weirdly truncated packages. For now, skip. */
-    if (packet_header.len != packet_header.caplen ||
-        packet_header.caplen < 1248) {
-      return;
-    }
 
     DataPacket temp;
+    int offset = 0; //continually update in order to parse these correctly.
 
-    int offset = 0;
-    int width_of_datablock = 100;
-    int width_of_channels = 3;
     /* Read the header in. */
     for (int i = 0; i < 42; i++) temp.header[i] = packet[i];
+
+    offset += 42;
 
     /* Read the DataBlocks in. */
     for (int i = 0; i < 12; i++) {
       /* Here we go. Grab the flag for a given block, offsetting the header. */
-      offset = (i*width_of_datablock) + 42;
-      temp.blocks[i].flag = uint16_t((packet[offset + 0]) << 8 |
-                                     (packet[offset + 1]));
+      temp.blocks[i].flag = uint16_t((packet[offset + 0]) |
+                                     (packet[offset + 1]) << 8);
 
-      temp.blocks[i].azimuth = uint16_t((packet[offset + 2]) << 8 |
-                                        (packet[offset + 3]));
+      temp.blocks[i].azimuth = uint16_t((packet[offset + 2]) |
+                                        (packet[offset + 3]) << 8);
+      offset += 4;
 
+      /* Figure out what a full packet is in timestamps */
+
+      //if (temp.blocks[i].azimuth == 16263) {
+        //cout << temp.timestamp << endl;
+      //}
+
+      //if (temp.blocks[i].azimuth == 16223) {
+        //cout << temp.timestamp << endl;
+      //}
       /* Read the Channels in. */
       for (int j = 0; j < 32; j++) {
-        offset = packet[42 + (i*width_of_datablock) +4+ (j*width_of_channels)];
-        temp.blocks[i].channels[j].distance = uint16_t((packet[offset + 0]) << 8 |
-                                                       (packet[offset + 1]));
+
+        temp.blocks[i].channels[j].distance = uint16_t((packet[offset + 0]) |
+                                                       (packet[offset + 1]) << 8);
+
+        /* Granularity is 2mm. */
+        temp.blocks[i].channels[j].distance *= 2;
+
+        //cout << temp.blocks[i].channels[j].distance << endl;
 
         temp.blocks[i].channels[j].reflectivity = packet[offset + 2];
+
+        offset += 3;
       }
     }
     /* Get the timestamp and factory. */
-    //1241
-    temp.timestamp = int((packet[1242]) << 24 |
-                         (packet[1243]) << 16 |
-                         (packet[1244]) << 8  |
-                         (packet[1245]));
+    temp.timestamp = int((packet[1242]) |
+                         (packet[1243]) << 8 |
+                         (packet[1244]) << 16|
+                         (packet[1245]) << 24);
 
-    temp.factory = uint16_t((packet[1246]) << 8 |
-                            (packet[1247]));
+    //cout << temp.timestamp << endl;
+
+    temp.factory = uint16_t((packet[1246]) |
+                            (packet[1247]) << 8);
 
     /* Construct the points from this parsed data. */
-    points.constructPointsFromPacket(temp, 100);
+    points.constructPointsFromPacket(temp);
 
   }
 
-
+/*
+  Callback when packet_body is full. Checks if caplen is correct: if incorrect,
+  skips.
+*/
 void my_packet_handler(u_char *args,
                        const struct pcap_pkthdr *packet_header,
                        const u_char *packet_body) {
-    //print_packet_info(packet_body, *packet_header);
-    /* What do we know at this point?
-       packet_body is containing our buffer of values.
-       We need to move this buffer over to our structs.
-       Maybe some sort of read function that takes the buffer? */
+
+    //For now, skip the GPS packets.
+    if (packet_header->len != 1248) return;
 
     read_into_data(packet_body, *packet_header);
 

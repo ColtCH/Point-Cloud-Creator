@@ -56,8 +56,12 @@ class PointCloud {
 
     /*Vector of sequences that is pushed into. *replace with array* */
     vector<FiringSequence> firing_sequences;
+    /* Change to array? */
+    //FiringSequence firing_sequence[?]
 
     ofstream debugfile;
+
+    double pi = 3.14159265;
 
     /* Laser elevations for lasers 0 - 15, as reported from manual. */
     int laser_elevation[16] = {-15, 1, -13, 3,
@@ -72,7 +76,7 @@ class PointCloud {
                                2.2,  -9.7, 0.7, -11.2};
 
   public:
-    void constructPointsFromPacket(DataPacket dp, int cutoff);
+    void constructPointsFromPacket(DataPacket dp);
     void initDebugFile();
 };
 
