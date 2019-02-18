@@ -1,0 +1,140 @@
+--------------------------------------------------------------------------------
+my_packet_handler:
+
+  description: /
+
+    In main, there is a call to pcap_loop. This is the self-defined
+    callback function. This means that when a particular event
+    occurs in pcap_loop that we are interested in(the event of
+    it becoming full), it passes the contents of the buffer as is
+    to the callback function.
+
+    This function serves the purpose of shoveling data from libpcap
+    into read_into_data.
+
+  \
+
+  pseudo-code: /
+
+    capture length != correct length? :
+        return from packet
+
+    call read_into_data, pass packet_body and packet_header
+
+  \
+
+  scope: /
+
+    Gives read_into_data correctly sized packets.
+
+  \
+
+--------------------------------------------------------------------------------
+print_packet_info:
+
+  description: /
+
+    When invoked, prints out capture length and total length of packet
+    passed in.
+
+    Serves little purpose in project, but useful for debugging.
+
+  \
+
+  pseudo-code: /
+
+    print packet capture length
+    print packet total length
+
+  \
+
+  scope: /
+
+    Not invoked in the project. Used for debug.
+
+  \
+
+--------------------------------------------------------------------------------
+read_into_data:
+
+  description: /
+
+    Given a block of bytes of size 1248, goes through full block and puts
+    into structures that correspond to the data that is parsed.
+
+    Jankily uses offset counter to keep up with current location in the
+    buffer. Instantiates a temporary variable, that receives all of the
+    data, which is then put into the array (TO COME: put into array)
+    based on the azimuth value. (TO COME: store each data block as a
+    separate thing, instead of all in the same block)
+
+  \
+
+  pseudo-code: /
+
+    #Create a temporary instance that holds the incoming data.
+    Packet_Container
+    Offset = 0
+    Get Packet_Container's header (42 bytes)
+    Offset = 42
+
+    for each data block (i : 12)
+      Get Packet_Container at Block i's flag (2 bytes)
+      Get Packet_Container at Block i's azimuth (2 bytes)
+      Offset = Offset + 4
+
+      for each channel in this data block (j : 32)
+        Get Packet_Container at Block i at Channel j's distance (2 bytes)
+        Get Packet_Container at Block i at Channel j's reflectivity (1 byte)
+        Offset = Offset + 3
+
+    Get Packet_Container's timestamp (4 bytes)
+    Get Packet_Container's factory (2 bytes)
+
+    call constructPointsFromPacket, pass Packet_Container
+
+  \
+
+  scope: /
+
+    Serves the purpose of taking the output of libpcap's buffer and turning
+    it into a usable format for conversion.
+
+  \
+
+--------------------------------------------------------------------------------
+constructPointsFromPacket:
+
+  description: /
+
+    Given a parsed data packet, convert into XYZ points.
+    Takes a DataPacket struct, and parses through each block for the data
+    necessary to form coordinates.
+
+  \
+
+  pseudo-code: /
+
+    for each block in Packet_Container (i : 12)
+      this azimuth = Packet_Container at Block i's azimuth
+
+      for each channel in this data block (j : 32)
+        this dist = Packet_Container at Block i at Channel j's distance
+        this elev = j % 16
+
+        x = dist * cos of this elev * sin of this dist
+        y = dist * cos of this elev * cos of this dist
+        z = dist * sin of this elev
+
+        apply corrections to x, y, z
+
+      push firing sequence into array
+
+  \
+
+  scope: /
+
+    this function takes C structs with LiDAR and outputs Point Cloud format.
+
+  /
+  --------------------------------------------------------------------------------
