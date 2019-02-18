@@ -1,0 +1,32 @@
+Right now, the C++ layer outputs the file data.
+Should the C++ layer be responsible for doing anything else?
+
+A few suggestions:
+
+	Current C++ layer (will refer to as parser layer for now) is
+	responsible for grouping coordinates into 'sequences', which 
+	would be a full rotation (azimuth = 0 -> azimuth = 360).
+	
+	After parser layer, another C++ layer sits on top. This layers
+	responsibility is to keep the data for the top layer organized,
+	and feed it to it. This is the only layer that will hold data.
+	
+	The top layer would be a Python layer which implements the ML
+	and reactive aspects of the project. This would take data from
+	the C++ bilayer and build predictive models from it.
+
+	PCAP DATA -> PARSER LAYER -> STORAGE LAYER -> ML LAYER
+	raw          formatted	     storage	      predictive
+
+	Parser Layer is almost done. 1-2 weeks.
+	Documentation of the Parser Layer is close to being done. 1-2 weeks.
+	Efficency Analysis will also take place during documentation.
+
+	Storage Layer will take some time to make efficent. 2-4 weeks
+	Documentation of this layer shouldn't take long. 1 week.
+
+	ML Layer will take the bulk of the work, but we can both work
+	on it. ?? weeks.
+	Documentation of the ML Layer will take ?? weeks.
+
+	How do you suggest we do it?
