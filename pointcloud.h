@@ -1,6 +1,5 @@
 #ifndef _POINTCLOUD_H_
 #define _POINTCLOUD_H_
-
 /*Includes...............*/
 #include <cstdint>
 #include <pcap.h>
@@ -15,7 +14,6 @@
 #include <iomanip>
 #include <fstream>
 /*.......................*/
-
 /*====================== RAW BINARY DATA STRUCTS =============================*/
 /*------------------CHANNEL-------------------*/
 struct __attribute__((packed)) Channel {
@@ -47,37 +45,23 @@ struct FiringSequence {
   Coordinate points[32];
 };
 /*============================================================================*/
-
-
 /*============ POINT CLOUD OBJECT FOR CONVERSION FROM BINARY DATA ============*/
-using namespace std;
 class PointCloud {
   private:
-
-    /*Vector of sequences that is pushed into. *replace with array* */
-    vector<FiringSequence> firing_sequences;
-    /* Change to array? */
-    //FiringSequence firing_sequence[?]
-
-    ofstream debugfile;
-
-    double pi = 3.14159265;
-
+    std::ofstream debugfile;
+    double pi = 3.141592653589;
     /* Laser elevations for lasers 0 - 15, as reported from manual. */
     int laser_elevation[16] = {-15, 1, -13, 3,
                                -11, 5, -9,  7,
                                -7,  9, -5,  11,
                                -3, 13, -1,  15};
-
     /* Laser corrections for lasers 0 - 15, as reported from manual. */
     double corrections[16] =  {11.2, -0.7, 9.7, -2.2,
                                8.1,  -3.7, 6.6, -5.1,
                                5.1,  -6.6, 3.7, -8.1,
                                2.2,  -9.7, 0.7, -11.2};
-
   public:
     void constructPointsFromPacket(DataPacket dp);
     void initDebugFile();
 };
-
 #endif

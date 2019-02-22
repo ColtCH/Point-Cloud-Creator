@@ -25,29 +25,34 @@ void PointCloud::constructPointsFromPacket(DataPacket dp){
         /* Save this channels distance. */
         uint16_t dist = dp.blocks[block].channels[channel].distance;
         /* Grab the elevation calculation. */
-        uint16_t elev = PointCloud::laser_elevation[channel % 16];
-
+        int16_t elev = PointCloud::laser_elevation[channel % 16];
         /* Compute our cartesian points. */
-        double _x = dist * cos(elev * (PointCloud::pi / 180.0)) * sin(this_azimuth * (PointCloud::pi / 180.0));
-        double _y = dist * cos(elev * (PointCloud::pi / 180.0)) * cos(this_azimuth * (PointCloud::pi / 180.0));
-        double _z = dist * sin(elev * (PointCloud::pi / 180.0));
-
+        double _x =  dist * cos(elev * (PointCloud::pi / 180.0)) *
+                    sin(this_azimuth * (PointCloud::pi / 180.0));
+        double _y  = dist * cos(elev * (PointCloud::pi / 180.0)) *
+                    cos(this_azimuth * (PointCloud::pi / 180.0));
+        double _z =  dist * sin(elev * (PointCloud::pi / 180.0));
+        /* Catch the failed laser executions? Not sure why they are so
+           frequent. Will look into later. */
+        if (_x == 0 && _y == 0 && _z == 0) continue;
         /* Apply vertical correction to the points. */
         _x += PointCloud::corrections[channel % 16];
         _y += PointCloud::corrections[channel % 16];
         _z += PointCloud::corrections[channel % 16];
-
-        /* Save this coordinate into the sequence. */
-        sequence.points[channel] = Coordinate(_x, _y, _z);
-
-        cout << _x << ' ' << _y << ' ' << _z << endl;
+        /* Keep this in case it is needed for later. Not currently in use. */
+        //sequence.points[channel] = Coordinate(_x, _y, _z);
+        /* Since this layer saves nothing, output into the program that
+           will sit on top of this one. */
+        std::cout << _x           << ' ' << std::setw(10)
+                  << _y           << ' ' << std::setw(10)
+                  << _z           << ' ' << std::setw(10)
+                  << this_azimuth << ' ' << std::setw(10)
+                  << dist         << ' ' << std::setw(10)
+                  << elev         << ' ' << std::setw(10)
+                  << (channel%16)        << std::setw(10) << std::endl;
       }
-      /* Push the sequence into our vector of firing sequences. */
-      firing_sequences.push_back(sequence);
     }
-  //}
 }
-
 void PointCloud::initDebugFile(){
   debugfile.open("debug.txt");
 }
