@@ -1,0 +1,35 @@
+Creator:    Colt Gainey
+Contact:    ctgaine@clemson.edu
+
+Description: 
+            Using libpcap, parses LiDAR data output from Velodyne Puck VP-16 and organizes into point cloud format.
+            
+Dependencies:
+            C++11
+            <libpcap.h>:
+                  sudo apt-get install libpcap-dev
+            matplotlib (for debug file, non essential for compilation)
+                  pip install matplotlib
+                  pip install numpy
+                  
+File Descriptions:
+            driver.cpp:
+                  Location of main(). File handling of libpcap is done here.
+            pointcloud.h:
+                  Class prototype of PointCloud handler. Also handles C structs and conversion to LiDAR structs.
+            pointcloud.cpp:
+                  Implements 'pointcloud.h'.
+            debug_points.py:
+                  Debug function used to diagnose problems with matplotlib 3D plots.
+            Sequence_Diagram.png:
+                  Illustrates object relations over time throughout execution of program.
+            Function_Dictionary.txt:
+                  Contains detailed analysis of functions created and used in program, as well as pseudo-code.
+            Future_Direction.txt:
+                  Meeting notes from CI meetings.
+            
+To Run:
+            make
+            ./PCAP <name_of_.pcap_file>.pcap
+            ./pcap <name_of_.pcap_file>.pcap | debug_points.py #If you want to run debug tools.
+                  
