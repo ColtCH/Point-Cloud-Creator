@@ -12,7 +12,7 @@ a data packet.
 points inside of PointCloud will contain 384 (12 * 32) more points.
 =============================================================================
 */
-void PointCloud::constructPointsFromPacket(DataPacket dp){
+void PointCloud::constructPointsFromPacket(DataPacket &dp){
   /* For debugging, uncomment this line and corresponding end brace. */
   //for (int to = 0; to < cutoff; to++) {
     for (int block = 0; block < 12; block++) {

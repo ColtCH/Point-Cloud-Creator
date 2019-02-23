@@ -61,7 +61,7 @@ class PointCloud {
                                5.1,  -6.6, 3.7, -8.1,
                                2.2,  -9.7, 0.7, -11.2};
   public:
-    void constructPointsFromPacket(DataPacket dp);
+    void constructPointsFromPacket(DataPacket &dp);
     void initDebugFile();
 };
 #endif
